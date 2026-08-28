@@ -18,11 +18,21 @@ async function criar({ nome }) {
   return rows[0];
 }
 
-async function atualizar(id, { nome }) {
+async function atualizar(id, dados) {
+  const campos = Object.entries(dados || {}).filter(([, valor]) => valor !== undefined && valor !== null);
+
+  if (campos.length === 0) {
+    return buscarPorId(id);
+  }
+
+  const colunas = campos.map(([campo], index) => `${campo} = $${index + 1}`).join(', ');
+  const valores = campos.map(([, valor]) => valor);
+
   const { rows } = await pool.query(
-    'UPDATE categorias SET nome = $1 WHERE id = $2 RETURNING *',
-    [nome, id]
+    `UPDATE categorias SET ${colunas} WHERE id = $${campos.length + 1} RETURNING *`,
+    [...valores, id]
   );
+
   return rows[0];
 }
 

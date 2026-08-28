@@ -2,7 +2,9 @@ const pModel = require ('../models/products');
 
 async function index(req, res, next) {
     try {
-        const produtos = await pModel.listarTodos();
+        const pagina = Number.parseInt(req.query.page ?? '1', 10) || 1;
+        const limite = Number.parseInt(req.query.limit ?? '10', 10) || 10;
+        const produtos = await pModel.listarTodos({ pagina, limite });
         res.json(produtos)
     } catch (err) {
         next(err);
@@ -39,6 +41,16 @@ async function update(req, res, next) {
   }
 };
 
+async function patch(req, res, next) {
+  try {
+    const produtoAtualizado = await pModel.atualizar(req.params.id, req.body);
+    if (!produtoAtualizado) return res.status(404).json({ erro: 'Produto não encontrado' });
+    res.json(produtoAtualizado);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function destroy(req, res, next) {
   try {
     const removido = await pModel.remover(req.params.id);
@@ -49,4 +61,4 @@ async function destroy(req, res, next) {
   }
 };
 
-module.exports = { index, show, store, update, destroy };
+module.exports = { index, show, store, update, patch, destroy };

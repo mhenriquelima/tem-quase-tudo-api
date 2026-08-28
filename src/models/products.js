@@ -1,8 +1,28 @@
 const pool = require('../config/db');
 
-async function listarTodos() {
-    const { rows } = await pool.query('SELECT * FROM produtos ORDER BY id')
-    return rows;
+async function listarTodos({ pagina = 1, limite = 10 } = {}) {
+    const page = Number(pagina) > 0 ? Number(pagina) : 1;
+    const limit = Number(limite) > 0 ? Number(limite) : 10;
+    const offset = (page - 1) * limit;
+
+    const [{ rows: totalRows }] = await Promise.all([
+        pool.query('SELECT COUNT(*)::int AS total FROM produtos')
+    ]);
+
+    const { rows } = await pool.query(
+        'SELECT * FROM produtos ORDER BY id LIMIT $1 OFFSET $2',
+        [limit, offset]
+    );
+
+    const total = Number(totalRows[0]?.total ?? 0);
+
+    return {
+        itens: rows,
+        pagina: page,
+        limite: limit,
+        total,
+        totalPaginas: Math.ceil(total / limit) || 1
+    };
 }
 
 async function buscarPorId(id) {
@@ -19,13 +39,23 @@ async function criar({nome, descricao, preco, estoque, categoria_id}) {
     return rows[0];
 }
 
-async function atualizar(id, { nome, descricao, preco, estoque, categoria_id }) {
+async function atualizar(id, campos) {
+  const dados = Object.entries(campos || {}).filter(([, valor]) => valor !== undefined && valor !== null);
+
+  if (dados.length === 0) {
+    return buscarPorId(id);
+  }
+
+  const colunas = dados.map(([campo]) => `${campo} = $${dados.findIndex(([nome]) => nome === campo) + 1}`);
+  const valores = dados.map(([, valor]) => valor);
+
   const { rows } = await pool.query(
     `UPDATE produtos
-     SET nome = $1, descricao = $2, preco = $3, estoque = $4, categoria_id = $5
-     WHERE id = $6 RETURNING *`,
-    [nome, descricao, preco, estoque, categoria_id ?? null, id]
+     SET ${colunas.join(', ')}
+     WHERE id = $${dados.length + 1} RETURNING *`,
+    [...valores, id]
   );
+
   return rows[0];
 }
 

@@ -41,6 +41,16 @@ async function update(req, res, next) {
   }
 }
 
+async function patch(req, res, next) {
+  try {
+    const atualizada = await categoriaModel.atualizar(req.params.id, req.body);
+    if (!atualizada) return res.status(404).json({ erro: 'Categoria não encontrada' });
+    res.json(atualizada);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function destroy(req, res, next) {
   try {
     const removida = await categoriaModel.remover(req.params.id);
@@ -51,4 +61,4 @@ async function destroy(req, res, next) {
   }
 }
 
-module.exports = { index, show, store, update, destroy };
+module.exports = { index, show, store, update, patch, destroy };
