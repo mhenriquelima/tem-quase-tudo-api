@@ -1,0 +1,228 @@
+# Tem Quase Tudo API
+
+API REST para gerenciamento de usuarios, produtos e categorias.
+
+## Requisitos
+
+- Node.js
+- PostgreSQL
+- Postman (opcional, para testar os endpoints)
+
+## Configuracao
+
+Crie um arquivo `.env` na raiz do projeto:
+
+```env
+DATABASE_URL=postgresql://usuario:senha@localhost:5432/nome_do_banco
+JWT_SECRET=uma-chave-secreta
+PORT=3000
+CORS_ORIGIN=*
+```
+
+Instale as dependencias e crie as tabelas:
+
+```bash
+npm install
+npm run migrate
+npm start
+```
+
+A API ficara disponivel em `http://localhost:3000`.
+
+## Resumo dos endpoints
+
+| Metodo | Endpoint | Autenticacao |
+| --- | --- | --- |
+| GET | `/api` | Publico |
+| POST | `/api/users/registro` | Publico |
+| POST | `/api/users/login` | Publico |
+| GET | `/api/users/me` | Bearer token |
+| GET | `/api/produtos` | Publico |
+| GET | `/api/produtos/:id` | Publico |
+| POST | `/api/produtos` | Publico |
+| PUT | `/api/produtos/:id` | Publico |
+| DELETE | `/api/produtos/:id` | Publico |
+| GET | `/api/categorias` | Publico |
+| GET | `/api/categorias/:id` | Publico |
+| POST | `/api/categorias` | Admin |
+| PUT | `/api/categorias/:id` | Admin |
+| DELETE | `/api/categorias/:id` | Admin |
+
+## Autenticacao
+
+### Registrar usuario
+
+**POST** `/api/users/registro`
+
+Body JSON:
+
+```json
+{
+  "nome": "Maria Silva",
+  "email": "maria@teste.com",
+  "senha": "123456"
+}
+```
+
+O usuario novo e criado com o papel `cliente`.
+
+### Fazer login
+
+**POST** `/api/users/login`
+
+Body JSON:
+
+```json
+{
+  "email": "maria@teste.com",
+  "senha": "123456"
+}
+```
+
+A resposta contem um `token`. No Postman, use a aba **Authorization**, selecione **Bearer Token** e cole esse valor no campo **Token**.
+
+### Consultar usuario autenticado
+
+**GET** `/api/users/me`
+
+Envie o header:
+
+```http
+Authorization: Bearer SEU_TOKEN
+```
+
+## Categorias
+
+Apenas leitura e consulta sao publicas. Criacao, alteracao e exclusao exigem um token de usuario com papel `admin`.
+
+### Listar categorias
+
+**GET** `/api/categorias`
+
+### Buscar categoria por ID
+
+**GET** `/api/categorias/1`
+
+### Criar categoria
+
+**POST** `/api/categorias`
+
+Headers:
+
+```http
+Content-Type: application/json
+Authorization: Bearer SEU_TOKEN_ADMIN
+```
+
+Body JSON:
+
+```json
+{
+  "nome": "Eletronicos"
+}
+```
+
+### Atualizar categoria
+
+**PUT** `/api/categorias/1`
+
+Body JSON:
+
+```json
+{
+  "nome": "Informatica"
+}
+```
+
+Envie tambem o header `Authorization` com o token de admin.
+
+### Excluir categoria
+
+**DELETE** `/api/categorias/1`
+
+Envie o header `Authorization` com o token de admin. A resposta esperada e `204 No Content`.
+
+## Criar um administrador
+
+O cadastro publico sempre cria usuarios como `cliente`. Para promover um usuario, execute no PostgreSQL:
+
+```sql
+UPDATE usuarios
+SET papel = 'admin'
+WHERE email = 'admin@teste.com';
+```
+
+Depois, faca login novamente para obter um token atualizado:
+
+```http
+POST http://localhost:3000/api/users/login
+```
+
+Use o novo token nas operacoes de categorias. O login deve retornar `"papel": "admin"` dentro de `user`.
+
+## Produtos
+
+### Listar produtos
+
+**GET** `/api/produtos`
+
+### Buscar produto por ID
+
+**GET** `/api/produtos/1`
+
+### Criar produto
+
+**POST** `/api/produtos`
+
+Body JSON:
+
+```json
+{
+  "nome": "Notebook",
+  "descricao": "Notebook para trabalho",
+  "preco": 2499.90,
+  "estoque": 10
+}
+```
+
+`nome`, `preco` e `estoque` devem ser informados. `preco` deve ser maior ou igual a zero e `estoque` deve ser um inteiro maior ou igual a zero.
+
+### Atualizar produto
+
+**PUT** `/api/produtos/1`
+
+Body JSON:
+
+```json
+{
+  "nome": "Notebook atualizado",
+  "descricao": "Modelo revisado",
+  "preco": 2299.90,
+  "estoque": 8
+}
+```
+
+### Excluir produto
+
+**DELETE** `/api/produtos/1`
+
+A resposta esperada e `204 No Content`.
+
+## Respostas e erros comuns
+
+- `200 OK`: consulta ou alteracao realizada.
+- `201 Created`: registro criado.
+- `204 No Content`: registro excluido.
+- `400 Bad Request`: dados invalidos.
+- `401 Unauthorized`: token ausente ou invalido.
+- `403 Forbidden`: token valido, mas usuario nao e admin.
+- `404 Not Found`: registro ou rota nao encontrada.
+- `409 Conflict`: categoria com o mesmo nome ja existe.
+
+As mensagens de erro sao retornadas em JSON, por exemplo:
+
+```json
+{
+  "erro": "Acesso restrito"
+}
+```
