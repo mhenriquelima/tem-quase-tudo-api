@@ -31,3 +31,17 @@ CREATE TABLE IF NOT EXISTS itens_carrinho (
   quantidade INTEGER NOT NULL DEFAULT 1 CHECK (quantidade > 0),
   UNIQUE (carrinho_id, produto_id)
 );
+CREATE TABLE IF NOT EXISTS pedidos (
+  id SERIAL PRIMARY KEY,
+  usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
+  status VARCHAR(20) NOT NULL DEFAULT 'pendente',
+  total NUMERIC(10, 2) NOT NULL,
+  criado_em TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS itens_pedido (
+  id SERIAL PRIMARY KEY,
+  pedido_id INTEGER NOT NULL REFERENCES pedidos(id) ON DELETE CASCADE,
+  produto_id INTEGER NOT NULL REFERENCES produtos(id) ON DELETE RESTRICT,
+  quantidade INTEGER NOT NULL CHECK (quantidade > 0),
+  preco_unitario NUMERIC(10, 2) NOT NULL
+);
