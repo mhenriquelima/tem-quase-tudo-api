@@ -1,3 +1,5 @@
+!!! Documento gerado via IA !!!
+
 # Tem Quase Tudo API
 
 API REST para gerenciamento de usuarios, produtos e categorias.
