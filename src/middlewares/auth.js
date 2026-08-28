@@ -28,6 +28,7 @@ function somenteAdmin(req, res, next) {
             erro: 'Acesso restrito'
         })
     }
+    next();
 } 
 
 module.exports = { autenticar, somenteAdmin};
