@@ -10,21 +10,21 @@ async function buscarPorId(id) {
     return rows[0];
 }
 
-async function criar({nome, descricao, preco, estoque}) {
+async function criar({nome, descricao, preco, estoque, categoria_id}) {
     const { rows } = await pool.query(
-        `INSERT INTO produtos (nome, descricao, preco, estoque)
-        VALUES ($1, $2, $3, $4) RETURNING *`,
-        [nome, descricao, preco, estoque]
+        `INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id)
+        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+        [nome, descricao, preco, estoque, categoria_id ?? null]
     );
     return rows[0];
 }
 
-async function atualizar(id, { nome, descricao, preco, estoque }) {
+async function atualizar(id, { nome, descricao, preco, estoque, categoria_id }) {
   const { rows } = await pool.query(
     `UPDATE produtos
-     SET nome = $1, descricao = $2, preco = $3, estoque = $4
-     WHERE id = $5 RETURNING *`,
-    [nome, descricao, preco, estoque, id]
+     SET nome = $1, descricao = $2, preco = $3, estoque = $4, categoria_id = $5
+     WHERE id = $6 RETURNING *`,
+    [nome, descricao, preco, estoque, categoria_id ?? null, id]
   );
   return rows[0];
 }

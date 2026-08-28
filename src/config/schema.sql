@@ -9,8 +9,11 @@ CREATE TABLE IF NOT EXISTS produtos (
   descricao TEXT,
   preco NUMERIC(10, 2) NOT NULL,
   estoque INTEGER NOT NULL DEFAULT 0,
-  criado_em TIMESTAMP NOT NULL DEFAULT NOW()
+  categoria_id INTEGER,
+  criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
+  CONSTRAINT fk_produtos_categoria FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE SET NULL
 );
+CREATE INDEX IF NOT EXISTS idx_produtos_categoria_id ON produtos (categoria_id);
 CREATE TABLE IF NOT EXISTS usuarios (
   id SERIAL PRIMARY KEY,
   nome VARCHAR(150) NOT NULL,
