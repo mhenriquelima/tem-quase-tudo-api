@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const { body, validationResult } = require('express-validator');
+const { autenticar, somenteAdmin } = require('../middlewares/auth');
 const pController = require('../controllers/products');
 
 const router = Router();
@@ -22,8 +23,8 @@ function checarValidacao(req, res, next) {
 
 router.get('/', pController.index);
 router.get('/:id', pController.show);
-router.post('/', validarProduto, checarValidacao, pController.store);
-router.put('/:id', validarProduto, checarValidacao, pController.update);
-router.delete('/:id', pController.destroy);
+router.post('/', autenticar, somenteAdmin, validarProduto, checarValidacao, pController.store);
+router.put('/:id', autenticar, somenteAdmin, validarProduto, checarValidacao, pController.update);
+router.delete('/:id', autenticar, somenteAdmin, pController.destroy);
 
 module.exports = router;
