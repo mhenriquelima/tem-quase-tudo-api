@@ -5,7 +5,8 @@ const helmet = require('helmet');
 require('dotenv').config();
 
 const pRoutes = require('./routes/products');
-const cRoutes = require('./routes/categorias');
+const catRoutes = require('./routes/categorias');
+const carRoute = require('./routes/carrinho');
 const uRoutes = require('./routes/auth');
 const errHandler = require('./middlewares/errHandler');
 
@@ -21,7 +22,8 @@ app.get('/api', (req, res) => {
 });
 
 app.use('/api/produtos', pRoutes);
-app.use('/api/categorias', cRoutes);
+app.use('/api/categorias', catRoutes);
+app.use('/api/carrinho', carRoute);
 app.use('/api/users', uRoutes);
 
 app.use((req, res) => {
