@@ -19,3 +19,15 @@ CREATE TABLE IF NOT EXISTS usuarios (
   papel VARCHAR(20) NOT NULL DEFAULT 'cliente',
   criado_em TIMESTAMP NOT NULL DEFAULT NOW()
 );
+CREATE TABLE IF NOT EXISTS carrinhos (
+  id SERIAL PRIMARY KEY,
+  usuario_id INTEGER NOT NULL UNIQUE REFERENCES usuarios(id) ON DELETE CASCADE,
+  criado_em TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS itens_carrinho (
+  id SERIAL PRIMARY KEY,
+  carrinho_id INTEGER NOT NULL REFERENCES carrinhos(id) ON DELETE CASCADE,
+  produto_id INTEGER NOT NULL REFERENCES produtos(id) ON DELETE CASCADE,
+  quantidade INTEGER NOT NULL DEFAULT 1 CHECK (quantidade > 0),
+  UNIQUE (carrinho_id, produto_id)
+);
