@@ -4,7 +4,8 @@ const helmet = require('helmet');
 
 require('dotenv').config();
 
-const pRoutes = require('./routes/products');
+const prRoutes = require('./routes/products');
+const peRoutes = require('./routes/pedido');
 const catRoutes = require('./routes/categorias');
 const carRoute = require('./routes/carrinho');
 const uRoutes = require('./routes/auth');
@@ -21,7 +22,8 @@ app.get('/api', (req, res) => {
   res.json({ status: 'API Tem Quase Tudo no ar' });
 });
 
-app.use('/api/produtos', pRoutes);
+app.use('/api/produtos', prRoutes);
+app.use('/api/pedido', peRoutes)
 app.use('/api/categorias', catRoutes);
 app.use('/api/carrinho', carRoute);
 app.use('/api/users', uRoutes);
