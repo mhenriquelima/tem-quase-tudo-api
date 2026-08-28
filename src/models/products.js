@@ -1,5 +1,13 @@
 const pool = require('../config/db');
 
+const CAMPOS_PERMITIDOS = new Set([
+  'nome',
+  'descricao',
+  'preco',
+  'estoque',
+  'categoria_id'
+]);
+
 async function listarTodos({ pagina = 1, limite = 10 } = {}) {
     const page = Number(pagina) > 0 ? Number(pagina) : 1;
     const limit = Number(limite) > 0 ? Number(limite) : 10;
@@ -40,18 +48,20 @@ async function criar({nome, descricao, preco, estoque, categoria_id}) {
 }
 
 async function atualizar(id, campos) {
-  const dados = Object.entries(campos || {}).filter(([, valor]) => valor !== undefined && valor !== null);
+  const dados = Object.entries(campos || {}).filter(
+    ([campo, valor]) => CAMPOS_PERMITIDOS.has(campo) && valor !== undefined && valor !== null
+  );
 
   if (dados.length === 0) {
     return buscarPorId(id);
   }
 
-  const colunas = dados.map(([campo]) => `${campo} = $${dados.findIndex(([nome]) => nome === campo) + 1}`);
+  const colunas = dados.map(([campo], index) => `${campo} = $${index + 1}`).join(', ');
   const valores = dados.map(([, valor]) => valor);
 
   const { rows } = await pool.query(
     `UPDATE produtos
-     SET ${colunas.join(', ')}
+     SET ${colunas}
      WHERE id = $${dados.length + 1} RETURNING *`,
     [...valores, id]
   );

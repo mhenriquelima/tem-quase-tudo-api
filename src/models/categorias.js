@@ -1,5 +1,7 @@
 const pool = require('../config/db');
 
+const CAMPOS_PERMITIDOS = new Set(['nome']);
+
 async function listarTodas() {
   const { rows } = await pool.query('SELECT * FROM categorias ORDER BY nome');
   return rows;
@@ -19,7 +21,9 @@ async function criar({ nome }) {
 }
 
 async function atualizar(id, dados) {
-  const campos = Object.entries(dados || {}).filter(([, valor]) => valor !== undefined && valor !== null);
+  const campos = Object.entries(dados || {}).filter(
+    ([campo, valor]) => CAMPOS_PERMITIDOS.has(campo) && valor !== undefined && valor !== null
+  );
 
   if (campos.length === 0) {
     return buscarPorId(id);
