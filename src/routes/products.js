@@ -9,14 +9,14 @@ const validarProduto = [
   body('nome').isString().trim().notEmpty().withMessage('Nome é obrigatório'),
   body('preco').isFloat({ min: 0 }).withMessage('Preço deve ser um número positivo'),
   body('estoque').optional().isInt({ min: 0 }).withMessage('Estoque deve ser um inteiro positivo'),
-  body('categoria_id').optional().isInt({ min: 1 }).withMessage('Categoria inválida'),
+  body('categoria_id').optional({ nullable: true }).isInt({ min: 1 }).withMessage('Categoria inválida'),
 ];
 
 const validarProdutoParcial = [
   body('nome').optional().isString().trim().notEmpty().withMessage('Nome é obrigatório'),
   body('preco').optional().isFloat({ min: 0 }).withMessage('Preço deve ser um número positivo'),
   body('estoque').optional().isInt({ min: 0 }).withMessage('Estoque deve ser um inteiro positivo'),
-  body('categoria_id').optional().isInt({ min: 1 }).withMessage('Categoria inválida'),
+  body('categoria_id').optional({ nullable: true }).isInt({ min: 1 }).withMessage('Categoria inválida'),
 ];
 
 function checarValidacao(req, res, next) {

@@ -49,7 +49,7 @@ async function criar({nome, descricao, preco, estoque, categoria_id}) {
 
 async function atualizar(id, campos) {
   const dados = Object.entries(campos || {}).filter(
-    ([campo, valor]) => CAMPOS_PERMITIDOS.has(campo) && valor !== undefined && valor !== null
+    ([campo, valor]) => CAMPOS_PERMITIDOS.has(campo) && valor !== undefined
   );
 
   if (dados.length === 0) {
