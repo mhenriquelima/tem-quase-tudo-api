@@ -9,6 +9,10 @@ const validarCategoria = [
   body('nome').isString().trim().notEmpty().withMessage('Nome é obrigatório'),
 ];
 
+const validarCategoriaParcial = [
+  body('nome').optional().isString().trim().notEmpty().withMessage('Nome é obrigatório'),
+];
+
 function checarValidacao(req, res, next) {
   const erros = validationResult(req);
   if (!erros.isEmpty()) {
@@ -21,6 +25,7 @@ router.get('/', cController.index);
 router.get('/:id', cController.show);
 router.post('/', autenticar, somenteAdmin, validarCategoria, checarValidacao, cController.store);
 router.put('/:id', autenticar, somenteAdmin, validarCategoria, checarValidacao, cController.update);
+router.patch('/:id', autenticar, somenteAdmin, validarCategoriaParcial, checarValidacao, cController.patch);
 router.delete('/:id', autenticar, somenteAdmin, cController.destroy);
 
 module.exports = router;

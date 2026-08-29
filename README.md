@@ -49,6 +49,15 @@ A API ficara disponivel em `http://localhost:3000`.
 | POST | `/api/categorias` | Admin |
 | PUT | `/api/categorias/:id` | Admin |
 | DELETE | `/api/categorias/:id` | Admin |
+| GET | `/api/carrinho` | Bearer token |
+| POST | `/api/carrinho/itens` | Bearer token |
+| PUT | `/api/carrinho/itens/:produtoId` | Bearer token |
+| DELETE | `/api/carrinho/itens/:produtoId` | Bearer token |
+| POST | `/api/pedido/checkout` | Bearer token |
+| GET | `/api/pedido` | Bearer token |
+| GET | `/api/pedido/:id` | Bearer token |
+| PUT | `/api/pedido/:id/status` | Admin |
+| PUT | `/api/pedido/:id/cancelar` | Bearer token |
 
 ## Autenticacao
 
@@ -209,6 +218,105 @@ Body JSON:
 **DELETE** `/api/produtos/1`
 
 A resposta esperada e `204 No Content`.
+
+## Carrinho
+
+Todas as operacoes do carrinho exigem um usuario autenticado. Configure no Postman a aba **Authorization** como **Bearer Token** e informe o token obtido no login.
+
+### Consultar carrinho
+
+**GET** `/api/carrinho`
+
+Exemplo de resposta:
+
+```json
+{
+  "carrinho_id": 1,
+  "itens": [],
+  "total": 0
+}
+```
+
+### Adicionar produto
+
+**POST** `/api/carrinho/itens`
+
+Body JSON:
+
+```json
+{
+  "produto_id": 1,
+  "quantidade": 2
+}
+```
+
+`quantidade` e opcional e assume `1` quando omitida. Se o produto ja estiver no carrinho, a quantidade e somada.
+
+### Atualizar quantidade
+
+**PUT** `/api/carrinho/itens/1`
+
+Body JSON:
+
+```json
+{
+  "quantidade": 3
+}
+```
+
+Neste exemplo, `1` e o `produtoId`, nao o ID do item do carrinho.
+
+### Remover produto
+
+**DELETE** `/api/carrinho/itens/1`
+
+Neste exemplo, `1` e o `produtoId`. A resposta esperada e `204 No Content`.
+
+## Pedidos
+
+Todas as rotas de pedidos exigem um token de usuario autenticado. Para criar um pedido, adicione primeiro pelo menos um produto ao carrinho.
+
+### Finalizar compra
+
+**POST** `/api/pedido/checkout`
+
+Nao exige body. O sistema cria o pedido, calcula o total, reduz o estoque e esvazia o carrinho.
+
+Resposta esperada: `201 Created`.
+
+### Listar meus pedidos
+
+**GET** `/api/pedido`
+
+Retorna somente os pedidos do usuario autenticado.
+
+### Ver detalhes de um pedido
+
+**GET** `/api/pedido/1`
+
+O usuario pode consultar seus proprios pedidos. Administradores podem consultar qualquer pedido.
+
+### Atualizar status
+
+**PUT** `/api/pedido/1/status`
+
+Exige token de administrador.
+
+Body JSON:
+
+```json
+{
+  "status": "pago"
+}
+```
+
+Status validos: `pendente`, `pago`, `enviado` e `cancelado`.
+
+### Cancelar pedido
+
+**PUT** `/api/pedido/1/cancelar`
+
+O dono do pedido ou um administrador pode cancelar. Pedidos com status `enviado` ou `cancelado` nao podem ser cancelados. Ao cancelar, o estoque dos produtos e devolvido.
 
 ## Respostas e erros comuns
 

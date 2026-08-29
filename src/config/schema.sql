@@ -9,8 +9,11 @@ CREATE TABLE IF NOT EXISTS produtos (
   descricao TEXT,
   preco NUMERIC(10, 2) NOT NULL,
   estoque INTEGER NOT NULL DEFAULT 0,
-  criado_em TIMESTAMP NOT NULL DEFAULT NOW()
+  categoria_id INTEGER,
+  criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
+  CONSTRAINT fk_produtos_categoria FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE SET NULL
 );
+CREATE INDEX IF NOT EXISTS idx_produtos_categoria_id ON produtos (categoria_id);
 CREATE TABLE IF NOT EXISTS usuarios (
   id SERIAL PRIMARY KEY,
   nome VARCHAR(150) NOT NULL,
@@ -18,4 +21,30 @@ CREATE TABLE IF NOT EXISTS usuarios (
   senha_hash TEXT NOT NULL,
   papel VARCHAR(20) NOT NULL DEFAULT 'cliente',
   criado_em TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS carrinhos (
+  id SERIAL PRIMARY KEY,
+  usuario_id INTEGER NOT NULL UNIQUE REFERENCES usuarios(id) ON DELETE CASCADE,
+  criado_em TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS itens_carrinho (
+  id SERIAL PRIMARY KEY,
+  carrinho_id INTEGER NOT NULL REFERENCES carrinhos(id) ON DELETE CASCADE,
+  produto_id INTEGER NOT NULL REFERENCES produtos(id) ON DELETE CASCADE,
+  quantidade INTEGER NOT NULL DEFAULT 1 CHECK (quantidade > 0),
+  UNIQUE (carrinho_id, produto_id)
+);
+CREATE TABLE IF NOT EXISTS pedidos (
+  id SERIAL PRIMARY KEY,
+  usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
+  status VARCHAR(20) NOT NULL DEFAULT 'pendente',
+  total NUMERIC(10, 2) NOT NULL,
+  criado_em TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS itens_pedido (
+  id SERIAL PRIMARY KEY,
+  pedido_id INTEGER NOT NULL REFERENCES pedidos(id) ON DELETE CASCADE,
+  produto_id INTEGER NOT NULL REFERENCES produtos(id) ON DELETE RESTRICT,
+  quantidade INTEGER NOT NULL CHECK (quantidade > 0),
+  preco_unitario NUMERIC(10, 2) NOT NULL
 );
