@@ -4,7 +4,9 @@ async function index(req, res, next) {
     try {
         const pagina = Number.parseInt(req.query.page ?? '1', 10) || 1;
         const limite = Number.parseInt(req.query.limit ?? '10', 10) || 10;
-        const produtos = await pModel.listarTodos({ pagina, limite });
+        const busca = req.query.busca?.trim() || undefined;
+        const categoria_id = Number.parseInt(req.query.categoria_id, 10) || undefined;
+        const produtos = await pModel.listarTodos({ pagina, limite, busca, categoria_id });
         res.json(produtos)
     } catch (err) {
         next(err);
