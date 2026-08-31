@@ -8,18 +8,34 @@ const CAMPOS_PERMITIDOS = new Set([
   'categoria_id'
 ]);
 
-async function listarTodos({ pagina = 1, limite = 10 } = {}) {
+async function listarTodos({ pagina = 1, limite = 10, busca, categoria_id } = {}) {
     const page = Number(pagina) > 0 ? Number(pagina) : 1;
     const limit = Number(limite) > 0 ? Number(limite) : 10;
     const offset = (page - 1) * limit;
 
-    const [{ rows: totalRows }] = await Promise.all([
-        pool.query('SELECT COUNT(*)::int AS total FROM produtos')
-    ]);
+    const condicoes = [];
+    const valores = [];
+
+    if (busca) {
+        valores.push(`%${busca}%`);
+        condicoes.push(`nome ILIKE $${valores.length}`);
+    }
+
+    if (categoria_id) {
+        valores.push(categoria_id);
+        condicoes.push(`categoria_id = $${valores.length}`);
+    }
+
+    const where = condicoes.length ? `WHERE ${condicoes.join(' AND ')}` : '';
+
+    const { rows: totalRows } = await pool.query(
+        `SELECT COUNT(*)::int AS total FROM produtos ${where}`,
+        valores
+    );
 
     const { rows } = await pool.query(
-        'SELECT * FROM produtos ORDER BY id LIMIT $1 OFFSET $2',
-        [limit, offset]
+        `SELECT * FROM produtos ${where} ORDER BY id LIMIT $${valores.length + 1} OFFSET $${valores.length + 2}`,
+        [...valores, limit, offset]
     );
 
     const total = Number(totalRows[0]?.total ?? 0);
